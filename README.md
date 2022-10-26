@@ -2,8 +2,6 @@
 
 The SPA application for the aggregation of RSS feeds.
 
-Link to app on Vercel: https://frontend-project-11-three-xi.vercel.app/
-
 [Link to app on Vercel](https://frontend-project-11-three-xi.vercel.app/)
 
 ----
