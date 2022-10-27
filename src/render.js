@@ -1,6 +1,6 @@
 export default (elements) => (path, value) => {
   const {
-    input, feedback, postsContainer, feedsContainer,
+    form, input, feedback, postsContainer, feedsContainer,
   } = elements;
 
   if (path === 'urlForm.state') {
@@ -14,11 +14,13 @@ export default (elements) => (path, value) => {
         feedback.classList.add('text-danger');
         feedback.textContent = 'Ссылка должна быть валидным URL';
         // feedback.textContent = 'RSS уже существует';
+        // feedback.textContent = 'Ошибка сети';
         break;
       case 'success':
         input.classList.remove('is-invalid');
-        input.reset();
-        feedback.classList.remove('text-dangers');
+        form.reset();
+        input.focus();
+        feedback.classList.remove('text-danger');
         feedback.classList.add('text-success');
         feedback.textContent = 'RSS успешно загружен';
         break;
@@ -30,6 +32,16 @@ export default (elements) => (path, value) => {
   if (path === 'urlList') {
     postsContainer.replaceChildren();
     feedsContainer.replaceChildren();
+
     // рендер списков постов и фидов
+
+    if (value.length === 0) return;
+    
+    value.map((item) => {
+      const postItem = document.createElement('li');
+      // postItem.classList.add('list-group-item d-flex justify-content-between align-items-start border-0 border-end-0');
+      postItem.innerHTML = item;
+      postsContainer.append(postItem);
+    })
   }
 };

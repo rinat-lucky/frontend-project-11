@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const state = onChange({
     urlForm: {
       state: 'valid',
-      url: '',
     },
     urlList: [],
   }, render(elements));
@@ -25,24 +24,25 @@ document.addEventListener('DOMContentLoaded', () => {
     .notOneOf(state.urlList);
 
   const validate = (url) => {
-    schema.validate(url).catch((e) => {
-      console.log(e.errors[0]);
-    });
+    schema.validate(url)
+      .then((rss) => {
+        state.urlForm.state = 'success';
+        state.urlList.push(rss);
+        console.log('Валидный RSS', rss);
+        console.log('STATE - success', state);
+        return;
+      })
+      .catch((e) => {
+        state.urlForm.state = 'invalid';
+        console.log('Ошибка', e);
+        console.log('Ошибка валидации', e.errors[0]);
+        console.log('STATE - error', state);
+        return;
+      });
   };
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    state.urlForm.url = e.target[0].value;
-
-    // проверить настройки валидации !!!
-    if (validate(state.urlForm.url)) {
-      state.urlForm.state = 'valid';
-      state.urlList.push(state.urlForm.url);
-    } else {
-      state.urlForm.state = 'invalid';
-    }
-
-    console.log('STATE after submit', state);
-    console.log('VALIDATION', validate(state.urlForm.url));
+    validate(e.target[0].value);
   });
 });
