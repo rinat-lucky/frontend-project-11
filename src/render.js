@@ -36,12 +36,13 @@ export default (elements) => (path, value) => {
     // рендер списков постов и фидов
 
     if (value.length === 0) return;
-    
+
     value.map((item) => {
       const postItem = document.createElement('li');
-      // postItem.classList.add('list-group-item d-flex justify-content-between align-items-start border-0 border-end-0');
+      // postItem.classList.add('list-group-item d-flex justify-content-between
+      // align-items-start border-0 border-end-0');
       postItem.innerHTML = item;
-      postsContainer.append(postItem);
-    })
+      return postsContainer.append(postItem);
+    });
   }
 };

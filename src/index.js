@@ -30,14 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
         state.urlList.push(rss);
         console.log('Валидный RSS', rss);
         console.log('STATE - success', state);
-        return;
       })
       .catch((e) => {
         state.urlForm.state = 'invalid';
         console.log('Ошибка', e);
         console.log('Ошибка валидации', e.errors[0]);
         console.log('STATE - error', state);
-        return;
       });
   };
 
