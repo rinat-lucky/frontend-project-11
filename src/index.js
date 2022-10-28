@@ -14,28 +14,39 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const state = { formStatus: 'valid', urlList: [] };
-  const watchedState = onChange(state, render(elements));
+  const watchedState = onChange(state, render(state, elements));
 
-  const schema = yup.string().url().trim().required()
-    .notOneOf(state.urlList);
+  const schemaStr = yup.string().required().url().trim();
+  const schemaMix = yup.mixed().notOneOf([state.urlList]);
+
+  const handleValidationErrors = (errorType) => {
+    switch (errorType) {
+      case 'url':
+        watchedState.error = 'Ссылка должна быть валидным URL';
+        break;
+      case 'notOneOf':
+        watchedState.error = 'RSS уже существует';
+        break;
+      default:
+        watchedState.error = 'Возникла неизвестная ошибка. Попробуйте еще раз';
+    }
+  };
 
   const validate = (url) => {
-    schema.validate(url)
-      .then((rss) => {
+    schemaStr.validate(url)
+      .then((url1) => schemaMix.validate(url1))
+      .then((url2) => {
         watchedState.formStatus = 'success';
-        // временный костыль (?), т.к. без него не обновляется форма
-        //  при многократном успешном добавлении фидов
         watchedState.formStatus = 'valid';
         watchedState.formStatus = 'success';
-        watchedState.urlList.push(rss);
-        console.log('Валидный RSS', rss);
-        console.log('STATE after add', state);
+        watchedState.urlList.push(url2);
       })
       .catch((e) => {
-        watchedState.formStatus = 'invalid';
         console.dir(e);
-        console.log(e.message);
-        console.log('STATE after error', state);
+        handleValidationErrors(e.type);
+        watchedState.formStatus = 'invalid';
+        watchedState.formStatus = 'valid';
+        watchedState.formStatus = 'invalid';
       });
   };
 

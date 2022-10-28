@@ -1,4 +1,4 @@
-export default (elements) => (path, value) => {
+export default (state, elements) => (path, value) => {
   const {
     form, input, feedback, postsContainer, feedsContainer,
   } = elements;
@@ -12,9 +12,7 @@ export default (elements) => (path, value) => {
         input.classList.add('is-invalid');
         feedback.classList.remove('text-success');
         feedback.classList.add('text-danger');
-        feedback.textContent = 'Ссылка должна быть валидным URL';
-        // feedback.textContent = 'RSS уже существует';
-        // feedback.textContent = 'Ошибка сети';
+        feedback.textContent = state.error;
         break;
       case 'success':
         input.classList.remove('is-invalid');
