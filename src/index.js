@@ -13,12 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     feedsContainer: document.querySelector('.feeds'),
   };
 
-  const state = onChange({
-    urlForm: {
-      state: 'valid',
-    },
-    urlList: [],
-  }, render(elements));
+  const state = { formStatus: 'valid', urlList: [] };
+  const watchedState = onChange(state, render(elements));
 
   const schema = yup.string().url().trim().required()
     .notOneOf(state.urlList);
@@ -26,21 +22,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const validate = (url) => {
     schema.validate(url)
       .then((rss) => {
-        state.urlForm.state = 'success';
-        state.urlList.push(rss);
+        watchedState.formStatus = 'success';
+        // временный костыль (?), т.к. без него не обновляется форма
+        //  при многократном успешном добавлении фидов
+        watchedState.formStatus = 'valid';
+        watchedState.formStatus = 'success';
+        watchedState.urlList.push(rss);
         console.log('Валидный RSS', rss);
-        console.log('STATE - success', state);
+        console.log('STATE after add', state);
       })
       .catch((e) => {
-        state.urlForm.state = 'invalid';
-        console.log('Ошибка', e);
-        console.log('Ошибка валидации', e.errors[0]);
-        console.log('STATE - error', state);
+        watchedState.formStatus = 'invalid';
+        console.dir(e);
+        console.log(e.message);
+        console.log('STATE after error', state);
       });
   };
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    validate(e.target[0].value);
+    const rssLink = e.target[0].value;
+    validate(rssLink);
   });
 });

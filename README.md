@@ -14,6 +14,8 @@ The SPA application for the aggregation of RSS feeds.
 
 [![Linter](https://github.com/rinat-lucky/frontend-project-11/actions/workflows/nodejs.yml/badge.svg)](https://github.com/rinat-lucky/frontend-project-11/actions/workflows/nodejs.yml)
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Frinat-lucky%2Ffrontend-project-11)
+
 ## Installation
 
 To install RSS-reader locally:

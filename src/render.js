@@ -3,7 +3,7 @@ export default (elements) => (path, value) => {
     form, input, feedback, postsContainer, feedsContainer,
   } = elements;
 
-  if (path === 'urlForm.state') {
+  if (path === 'formStatus') {
     switch (value) {
       case 'valid':
         input.classList.remove('is-invalid');
@@ -18,11 +18,11 @@ export default (elements) => (path, value) => {
         break;
       case 'success':
         input.classList.remove('is-invalid');
-        form.reset();
-        input.focus();
         feedback.classList.remove('text-danger');
         feedback.classList.add('text-success');
         feedback.textContent = 'RSS успешно загружен';
+        form.reset();
+        input.focus();
         break;
       default:
         throw new Error(`Unknown state: ${value}`);
@@ -33,9 +33,7 @@ export default (elements) => (path, value) => {
     postsContainer.replaceChildren();
     feedsContainer.replaceChildren();
 
-    // рендер списков постов и фидов
-
-    if (value.length === 0) return;
+    if (value.length === 0) return value;
 
     value.map((item) => {
       const postItem = document.createElement('li');
@@ -45,4 +43,5 @@ export default (elements) => (path, value) => {
       return postsContainer.append(postItem);
     });
   }
+  return elements;
 };
