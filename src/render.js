@@ -1,7 +1,33 @@
-export default (state, elements) => (path, value) => {
+export default (i18n, state, elements) => (path, value) => {
   const {
     form, input, feedback, postsContainer, feedsContainer,
   } = elements;
+
+  const renderFormError = () => {
+    input.classList.add('is-invalid');
+    feedback.classList.remove('text-success');
+    feedback.classList.add('text-danger');
+    switch (state.errorType) {
+      case 'url':
+      case 'required':
+        feedback.textContent = i18n.t('feedback.invalidUrl');
+        break;
+      case 'notOneOf':
+        feedback.textContent = i18n.t('feedback.invalidNotOneOf');
+        break;
+      default:
+        feedback.textContent = i18n.t('feedback.invalidUnknown');
+    }
+  };
+
+  const renderFormSuccess = () => {
+    input.classList.remove('is-invalid');
+    feedback.classList.remove('text-danger');
+    feedback.classList.add('text-success');
+    feedback.textContent = i18n.t('feedback.success');
+    form.reset();
+    input.focus();
+  };
 
   if (path === 'formStatus') {
     switch (value) {
@@ -9,19 +35,9 @@ export default (state, elements) => (path, value) => {
         input.classList.remove('is-invalid');
         break;
       case 'invalid':
-        input.classList.add('is-invalid');
-        feedback.classList.remove('text-success');
-        feedback.classList.add('text-danger');
-        feedback.textContent = state.error;
-        break;
+        return renderFormError();
       case 'success':
-        input.classList.remove('is-invalid');
-        feedback.classList.remove('text-danger');
-        feedback.classList.add('text-success');
-        feedback.textContent = 'RSS успешно загружен';
-        form.reset();
-        input.focus();
-        break;
+        return renderFormSuccess();
       default:
         throw new Error(`Unknown state: ${value}`);
     }
