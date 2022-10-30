@@ -1,6 +1,8 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
+import axios from 'axios';
 import render from './render.js';
+import parse from './parser.js';
 
 export default (i18n) => {
   const elements = {
@@ -17,26 +19,36 @@ export default (i18n) => {
   const schemaStr = yup.string().required().url().trim();
   const schemaMix = yup.mixed().notOneOf([state.urlList]);
 
-  const validate = (url) => {
-    schemaStr.validate(url)
-      .then((url1) => schemaMix.validate(url1))
-      .then((url2) => {
-        watchedState.formStatus = 'success';
-        watchedState.formStatus = 'valid';
-        watchedState.formStatus = 'success';
-        watchedState.urlList.push(url2);
-      })
-      .catch((e) => {
-        watchedState.errorType = e.type;
-        watchedState.formStatus = 'invalid';
-        watchedState.formStatus = 'valid';
-        watchedState.formStatus = 'invalid';
-      });
+  const isValid = (url) => schemaStr.validate(url)
+    .then((url1) => schemaMix.validate(url1))
+    .then(() => true)
+    .catch((e) => {
+      watchedState.errorType = e.type;
+      return false;
+    });
+
+  const routes = {
+    rssPath: () => 'http://lorem-rss.herokuapp.com/feed',
   };
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const rssLink = e.target[0].value;
-    validate(rssLink);
+
+    if (isValid(rssLink)) {
+      axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(routes.rssPath())}`)
+        .then((response) => {
+          const feed = parse(response.data.contents);
+          console.log('ФИД', feed);
+          watchedState.urlList.push(feed.feedTitle);
+          watchedState.formStatus = 'success';
+        })
+        .catch((error) => {
+          console.log(error.message);
+          watchedState.formStatus = 'invalid';
+        });
+    } else {
+      watchedState.formStatus = 'invalid';
+    }
   });
 };
