@@ -7,5 +7,8 @@ export default {
       invalidUnknown: 'Возникла неизвестная ошибка. Попробуйте еще раз - i18',
       invalidNotRSS: 'Ресурс не содержит валидный RSS - i18',
     },
+    posts: 'Посты - i18',
+    feeds: 'Фиды - i18',
+    buttonRead: 'Просмотр - i18',
   },
 };
