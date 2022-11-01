@@ -5,6 +5,10 @@ const parser = new DOMParser();
 export default (data) => {
   const xmlDoc = parser.parseFromString(data, 'application/xml');
 
+  if (xmlDoc.querySelector('parsererror')) {
+    throw new Error('invalid rss');
+  }
+
   const feedTitle = xmlDoc.querySelector('title').textContent;
   const feedDescr = xmlDoc.querySelector('description').textContent;
   const id = uniqueId();

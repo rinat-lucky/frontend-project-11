@@ -7,13 +7,19 @@ export default (i18n, state, elements) => (path, value) => {
     input.classList.add('is-invalid');
     feedback.classList.remove('text-success');
     feedback.classList.add('text-danger');
-    switch (state.errorType) {
+    switch (state.error) {
       case 'url':
       case 'required':
         feedback.textContent = i18n.t('feedback.invalidUrl');
         break;
       case 'notOneOf':
         feedback.textContent = i18n.t('feedback.invalidNotOneOf');
+        break;
+      case 'network error':
+        feedback.textContent = i18n.t('feedback.invalidNetwork');
+        break;
+      case 'invalid rss':
+        feedback.textContent = i18n.t('feedback.invalidRSS');
         break;
       default:
         feedback.textContent = i18n.t('feedback.invalidUnknown');
