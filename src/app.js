@@ -19,14 +19,26 @@ export default (i18n) => {
   const watchedState = onChange(state, render(i18n, state, elements));
   const schemaStr = yup.string().required().url().trim();
   const schemaMix = yup.mixed().notOneOf([state.rssLinks]);
+  const getAxios = (url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`);
 
-  elements.form.addEventListener('submit', (evt) => {
-    evt.preventDefault();
-    const rssLink = evt.target[0].value;
+  const updateRss = () => {
+    state.rssLinks.forEach((rss) => {
+      setTimeout(getAxios(rss).then((response) => {
+        const { posts } = parse(response.data.contents);
+        watchedState.posts.push(posts);
+        watchedState.formStatus = 'valid';
+        console.log('UPDATE RSS: ', rss);
+      }), 5000);
+    });
+  };
+
+  elements.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const rssLink = e.target[0].value;
 
     schemaStr.validate(rssLink)
       .then((url) => schemaMix.validate(url))
-      .then((url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`))
+      .then((url) => getAxios(url))
       .then((response) => {
         const { feed, posts } = parse(response.data.contents);
         watchedState.rssLinks.push(rssLink);
@@ -36,6 +48,7 @@ export default (i18n) => {
         watchedState.formStatus = 'success';
         watchedState.formStatus = 'valid';
         watchedState.formStatus = 'success';
+        updateRss();
       })
       .catch((err) => {
         watchedState.error = err.type ?? err.message.toLowerCase();
@@ -45,3 +58,6 @@ export default (i18n) => {
       });
   });
 };
+
+// генератор фидов с обновлением постов раз в секунду
+// http://lorem-rss.herokuapp.com/feed?unit=second

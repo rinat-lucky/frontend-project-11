@@ -75,6 +75,7 @@ export default (i18n, state, elements) => (path, value) => {
     switch (value) {
       case 'valid':
         input.classList.remove('is-invalid');
+        renderContent();
         break;
       case 'invalid':
         renderFormError();
