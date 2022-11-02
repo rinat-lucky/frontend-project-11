@@ -9,6 +9,10 @@ export default (i18n) => {
     feedback: document.querySelector('.feedback'),
     postsContainer: document.querySelector('.posts'),
     feedsContainer: document.querySelector('.feeds'),
+    modalTitle: document.querySelector('.modal-title'),
+    modalDescr: document.querySelector('.modal-descr'),
+    modalReadBtn: document.querySelector('.modal-link'),
+    modalCloseBtn: document.querySelector('.modal-close'),
   };
 
   const state = {

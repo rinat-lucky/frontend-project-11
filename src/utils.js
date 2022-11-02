@@ -30,7 +30,7 @@ export const parse = (data) => {
     const postID = uniqueId();
     const feedID = id;
     posts.push({
-      postID, postTitle, postDescr, postLink, feedID,
+      postID, postTitle, postDescr, postLink, feedID, hasBeenRead: false,
     });
   });
 

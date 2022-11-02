@@ -1,6 +1,7 @@
 export default (i18n, state, elements) => (path, value) => {
   const {
     form, input, feedback, postsContainer, feedsContainer,
+    modalTitle, modalDescr, modalReadBtn, modalCloseBtn,
   } = elements;
 
   const renderFormError = () => {
@@ -64,7 +65,41 @@ export default (i18n, state, elements) => (path, value) => {
     state.posts.flat().map((post) => {
       const postItem = document.createElement('li');
       postItem.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-start border-0 border-end-0');
-      postItem.innerHTML = `<a href="${post.postLink}" class="fw-bold" data-id="${post.postID}" target="_blank" rel="noopener noreferrer">${post.postTitle}</a><button type="button" class="btn btn-outline-primary btn-sm" data-id="504" data-bs-toggle="modal" data-bs-target="#modal">${i18n.t('buttonRead')}</button></li>`;
+
+      const postLink = document.createElement('a');
+      postLink.setAttribute('href', `${post.postLink}`);
+
+      if (post.hasBeenRead) {
+        postLink.setAttribute('class', 'fw-normal');
+      } else {
+        postLink.setAttribute('class', 'fw-bold');
+      }
+
+      postLink.setAttribute('data-id', `${post.postID}`);
+      postLink.setAttribute('target', '_blank');
+      postLink.setAttribute('rel', 'noopener noreferrer');
+      postLink.textContent = post.postTitle;
+
+      const postButton = document.createElement('button');
+      postButton.setAttribute('type', 'button');
+      postButton.setAttribute('class', 'btn btn-outline-primary btn-sm');
+      postButton.setAttribute('data-id', `${post.postID}`);
+      postButton.setAttribute('data-bs-toggle', 'modal');
+      postButton.setAttribute('data-bs-target', '#modal');
+      postButton.textContent = i18n.t('buttonRead');
+      postButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('EVENT-TARGET (модалка)', e.target);
+        // изменить статус (состояние) у кликнутой ссылки (id из дата-атрибута)
+
+        modalTitle.textContent = post.postTitle;
+        modalDescr.textContent = post.postDescr;
+        modalReadBtn.setAttribute('href', `${post.postLink}`);
+        modalReadBtn.textContent = i18n.t('modal.read');
+        modalCloseBtn.textContent = i18n.t('modal.close');
+      });
+      postItem.append(postLink);
+      postItem.append(postButton);
       return postsList.prepend(postItem);
     });
 

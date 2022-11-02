@@ -8,6 +8,10 @@ export default {
       invalidRSS: 'Ресурс не содержит валидный RSS',
       invalidNetwork: 'Проверьте подключение к сети Интернет и попробуйте еще раз',
     },
+    modal: {
+      read: 'Читать полностью',
+      close: 'Закрыть',
+    },
     posts: 'Посты',
     feeds: 'Фиды',
     buttonRead: 'Просмотр',
