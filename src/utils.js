@@ -1,20 +1,27 @@
+import * as yup from 'yup';
+import axios from 'axios';
 import uniqueId from 'lodash/uniqueId.js';
 
-const parser = new DOMParser();
+export const validate = (link, collection) => {
+  const schemaStr = yup.string().required().url().trim();
+  const schemaMix = yup.mixed().notOneOf([collection]);
+  return schemaStr.validate(link)
+    .then((url) => schemaMix.validate(url));
+};
 
-export default (data) => {
+export const getData = (url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`);
+
+export const parse = (data) => {
+  const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(data, 'application/xml');
 
-  if (xmlDoc.querySelector('parsererror')) {
-    throw new Error('invalid rss');
-  }
+  if (xmlDoc.querySelector('parsererror')) throw new Error('invalid rss');
 
   const feedTitle = xmlDoc.querySelector('title').textContent;
   const feedDescr = xmlDoc.querySelector('description').textContent;
   const id = uniqueId();
 
   const posts = [];
-
   const postsElems = xmlDoc.querySelectorAll('item');
   postsElems.forEach((post) => {
     const postTitle = post.querySelector('title').textContent;

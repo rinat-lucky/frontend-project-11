@@ -1,8 +1,6 @@
-import * as yup from 'yup';
 import onChange from 'on-change';
-import axios from 'axios';
 import render from './render.js';
-import parse from './parser.js';
+import { validate, getData, parse } from './utils.js';
 
 export default (i18n) => {
   const elements = {
@@ -17,47 +15,49 @@ export default (i18n) => {
     formStatus: 'valid', rssLinks: [], feeds: [], posts: [],
   };
   const watchedState = onChange(state, render(i18n, state, elements));
-  const schemaStr = yup.string().required().url().trim();
-  const schemaMix = yup.mixed().notOneOf([state.rssLinks]);
-  const getAxios = (url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`);
 
   const updateRss = () => {
-    state.rssLinks.forEach((rss) => {
-      setTimeout(getAxios(rss).then((response) => {
-        const { posts } = parse(response.data.contents);
-        watchedState.posts.push(posts);
-        watchedState.formStatus = 'valid';
-        console.log('UPDATE RSS: ', rss);
-      }), 5000);
+    if (state.rssLinks.length < 1) return state;
+    state.rssLinks.forEach((url) => {
+      getData(url)
+        .then((response) => {
+          const { posts } = parse(response.data.contents);
+          const newPosts = posts.filter((post) => {
+            const collOfPostsLinks = state.posts.flat().map((postInState) => postInState.postLink);
+            return !collOfPostsLinks.includes(post.postLink);
+          });
+
+          watchedState.posts.push(newPosts);
+          watchedState.formStatus = 'valid';
+          watchedState.formStatus = 'updated';
+        })
+        .then(setTimeout(() => { updateRss(); }, 15000))
+        .catch((err) => err.message);
     });
+    return state;
   };
 
-  elements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const rssLink = e.target[0].value;
-
-    schemaStr.validate(rssLink)
-      .then((url) => schemaMix.validate(url))
-      .then((url) => getAxios(url))
-      .then((response) => {
-        const { feed, posts } = parse(response.data.contents);
-        watchedState.rssLinks.push(rssLink);
+  const handleEnteredLink = (link) => {
+    validate(link, state.rssLinks)
+      .then((validURL) => getData(validURL))
+      .then((data) => {
+        const { feed, posts } = parse(data.data.contents);
+        watchedState.rssLinks.push(link);
         watchedState.feeds.push(feed);
         watchedState.posts.push(posts);
         watchedState.error = '';
         watchedState.formStatus = 'success';
-        watchedState.formStatus = 'valid';
-        watchedState.formStatus = 'success';
-        updateRss();
       })
+      .then(setTimeout(() => { updateRss(); }, 15000))
       .catch((err) => {
         watchedState.error = err.type ?? err.message.toLowerCase();
         watchedState.formStatus = 'invalid';
-        watchedState.formStatus = 'valid';
-        watchedState.formStatus = 'invalid';
       });
+  };
+
+  elements.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const enteredLink = e.target[0].value;
+    handleEnteredLink(enteredLink);
   });
 };
-
-// генератор фидов с обновлением постов раз в секунду
-// http://lorem-rss.herokuapp.com/feed?unit=second
