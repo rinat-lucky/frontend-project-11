@@ -22,6 +22,7 @@ export const parse = (data) => {
   const id = uniqueId();
 
   const posts = [];
+  // const postsVisits = [];
   const postsElems = xmlDoc.querySelectorAll('item');
   postsElems.forEach((post) => {
     const postTitle = post.querySelector('title').textContent;
@@ -30,8 +31,11 @@ export const parse = (data) => {
     const postID = uniqueId();
     const feedID = id;
     posts.push({
-      postID, postTitle, postDescr, postLink, feedID, hasBeenRead: false,
+      postID, postTitle, postDescr, postLink, feedID,
     });
+    // postsVisits.push({
+    //   postID, visited: false,
+    // });
   });
 
   return {
@@ -39,5 +43,6 @@ export const parse = (data) => {
       id, feedTitle, feedDescr,
     },
     posts,
+    // postsVisits,
   };
 };

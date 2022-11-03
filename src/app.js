@@ -49,6 +49,7 @@ export default (i18n) => {
         watchedState.rssLinks.push(link);
         watchedState.feeds.push(feed);
         watchedState.posts.push(posts);
+        // watchedState.uiState.postsVisits.push(postsVisits);
         watchedState.error = '';
         watchedState.formStatus = 'success';
       })
