@@ -9,16 +9,13 @@ export default (i18n) => {
     feedback: document.querySelector('.feedback'),
     postsContainer: document.querySelector('.posts'),
     feedsContainer: document.querySelector('.feeds'),
-    modalTitle: document.querySelector('.modal-title'),
-    modalDescr: document.querySelector('.modal-descr'),
-    modalReadBtn: document.querySelector('.modal-link'),
-    modalCloseBtn: document.querySelector('.modal-close'),
+    modal: document.querySelector('.modal'),
   };
 
   const state = {
-    formStatus: 'valid', rssLinks: [], feeds: [], posts: [],
+    status: 'valid', rssLinks: [], feeds: [], posts: [], postsVisits: [],
   };
-  const watchedState = onChange(state, render(i18n, state, elements));
+  const watchedState = onChange(state, render(state, elements, i18n));
 
   const updateRss = () => {
     if (state.rssLinks.length < 1) return state;
@@ -32,10 +29,10 @@ export default (i18n) => {
           });
 
           watchedState.posts.push(newPosts);
-          watchedState.formStatus = 'valid';
-          watchedState.formStatus = 'updated';
+          watchedState.status = 'valid';
+          watchedState.status = 'updated';
         })
-        .then(setTimeout(() => { updateRss(); }, 15000))
+        .then(setTimeout(() => { updateRss(); }, 999000))
         .catch((err) => err.message);
     });
     return state;
@@ -45,18 +42,22 @@ export default (i18n) => {
     validate(link, state.rssLinks)
       .then((validURL) => getData(validURL))
       .then((data) => {
-        const { feed, posts } = parse(data.data.contents);
+        const { feed, posts, postsVisits } = parse(data.data.contents);
         watchedState.rssLinks.push(link);
         watchedState.feeds.push(feed);
         watchedState.posts.push(posts);
-        // watchedState.uiState.postsVisits.push(postsVisits);
+        watchedState.postsVisits.push(postsVisits);
         watchedState.error = '';
-        watchedState.formStatus = 'success';
+        watchedState.status = 'success';
+        watchedState.status = 'valid';
+        watchedState.status = 'success';
       })
-      .then(setTimeout(() => { updateRss(); }, 15000))
+      .then(setTimeout(() => { updateRss(); }, 999000))
       .catch((err) => {
         watchedState.error = err.type ?? err.message.toLowerCase();
-        watchedState.formStatus = 'invalid';
+        watchedState.status = 'invalid';
+        watchedState.status = 'valid';
+        watchedState.status = 'invalid';
       });
   };
 
