@@ -81,8 +81,10 @@ const renderFormError = (state, elements, i18n) => {
   feedback.classList.add('text-danger');
   switch (state.error) {
     case 'url':
-    case 'required':
       feedback.textContent = i18n.t('feedback.invalidUrl');
+      break;
+    case 'required':
+      feedback.textContent = i18n.t('feedback.invalidRequired');
       break;
     case 'notOneOf':
       feedback.textContent = i18n.t('feedback.invalidNotOneOf');
