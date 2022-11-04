@@ -38,8 +38,10 @@ const handleReadButton = (event, post, state, elements, i18n) => {
 
 const createPostItem = (post, state, elements, i18n) => {
   const postItem = document.createElement('li');
-  postItem.setAttribute('class',
-    'list-group-item d-flex justify-content-between align-items-start border-0 border-end-0');
+  postItem.setAttribute(
+    'class',
+    'list-group-item d-flex justify-content-between align-items-start border-0 border-end-0',
+  );
 
   const postLink = document.createElement('a');
   postLink.setAttribute('href', `${post.postLink}`);
