@@ -136,7 +136,7 @@ const renderContent = (state, elements, i18n) => {
 
 export default (state, elements, i18n) => (path, value) => {
   const { input, feedback } = elements;
-  if (path === 'bootStatus') {
+  if (path === 'formStatus') {
     switch (value) {
       case 'valid':
         input.classList.remove('is-invalid');

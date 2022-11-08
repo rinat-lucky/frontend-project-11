@@ -15,7 +15,7 @@ export default (i18n) => {
   };
 
   const state = {
-    bootStatus: 'valid', rssLinks: [], feeds: [], posts: [], postsVisits: [],
+    formStatus: 'valid', contentStatus: 'valid', rssLinks: [], feeds: [], posts: [], postsVisits: [],
   };
   const watchedState = onChange(state, render(state, elements, i18n));
 
@@ -30,7 +30,7 @@ export default (i18n) => {
             return !collOfPostsLinks.includes(post.postLink);
           });
           watchedState.posts.push(newPosts);
-          watchedState.bootStatus = 'updated';
+          watchedState.formStatus = 'updated';
         })
         .catch((err) => err.message);
     });
@@ -49,18 +49,19 @@ export default (i18n) => {
         watchedState.posts.push(posts);
         watchedState.postsVisits.push(postsVisits);
         watchedState.error = '';
-        watchedState.bootStatus = 'success';
+        watchedState.formStatus = 'success';
       })
       .then(setTimeout(() => { updateRss(); }, TIMER))
       .catch((err) => {
         watchedState.error = err.type ?? err.message.toLowerCase();
-        watchedState.bootStatus = 'invalid';
+        watchedState.formStatus = 'invalid';
+        console.log('ОШИБКА', err);
       });
   };
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const enteredLink = e.target[0].value;
-    handleEnteredLink(enteredLink);
+    const formData = new FormData(e.target);
+    handleEnteredLink(formData.get('url'));
   });
 };
