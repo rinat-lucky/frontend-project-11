@@ -2,6 +2,8 @@ import onChange from 'on-change';
 import render from './render.js';
 import { validate, getData, parse } from './utils.js';
 
+const TIMER = 7000;
+
 export default (i18n) => {
   const elements = {
     form: document.querySelector('form'),
@@ -13,13 +15,13 @@ export default (i18n) => {
   };
 
   const state = {
-    status: 'valid', rssLinks: [], feeds: [], posts: [], postsVisits: [],
+    bootStatus: 'valid', rssLinks: [], feeds: [], posts: [], postsVisits: [],
   };
   const watchedState = onChange(state, render(state, elements, i18n));
 
   const updateRss = () => {
-    if (state.rssLinks.length < 1) return state;
-    state.rssLinks.forEach((url) => {
+    if (state.rssLinks.length < 1) return;
+    const promises = state.rssLinks.forEach((url) => {
       getData(url)
         .then((response) => {
           const { posts } = parse(response.data.contents);
@@ -27,15 +29,14 @@ export default (i18n) => {
             const collOfPostsLinks = state.posts.flat().map((postInState) => postInState.postLink);
             return !collOfPostsLinks.includes(post.postLink);
           });
-
           watchedState.posts.push(newPosts);
-          watchedState.status = 'valid';
-          watchedState.status = 'updated';
+          watchedState.bootStatus = 'updated';
         })
-        .then(setTimeout(() => { updateRss(); }, 999000))
         .catch((err) => err.message);
     });
-    return state;
+    const promise = Promise.all(promises);
+    promise.then(setTimeout(() => { updateRss(); }, TIMER))
+      .catch((err) => err.message);
   };
 
   const handleEnteredLink = (link) => {
@@ -48,16 +49,12 @@ export default (i18n) => {
         watchedState.posts.push(posts);
         watchedState.postsVisits.push(postsVisits);
         watchedState.error = '';
-        watchedState.status = 'success';
-        watchedState.status = 'valid';
-        watchedState.status = 'success';
+        watchedState.bootStatus = 'success';
       })
-      .then(setTimeout(() => { updateRss(); }, 999000))
+      .then(setTimeout(() => { updateRss(); }, TIMER))
       .catch((err) => {
         watchedState.error = err.type ?? err.message.toLowerCase();
-        watchedState.status = 'invalid';
-        watchedState.status = 'valid';
-        watchedState.status = 'invalid';
+        watchedState.bootStatus = 'invalid';
       });
   };
 

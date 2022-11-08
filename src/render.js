@@ -127,18 +127,23 @@ const renderContent = (state, elements, i18n) => {
   const feedsList = feedsContainer.querySelector('ul');
   const postsList = postsContainer.querySelector('ul');
 
-  state.feeds.map((feed) => feedsList.prepend(createFeedItem(feed)));
-  state.posts.flat().map((post) => postsList.prepend(createPostItem(post, state, elements, i18n)));
+  state.feeds.forEach((feed) => feedsList.prepend(createFeedItem(feed)));
+  state.posts.flat().forEach((post) => {
+    postsList.prepend(createPostItem(post, state, elements, i18n));
+  });
   return state;
 };
 
 export default (state, elements, i18n) => (path, value) => {
-  if (path === 'status') {
+  const { input, feedback } = elements;
+  if (path === 'bootStatus') {
     switch (value) {
       case 'valid':
-        elements.input.classList.remove('is-invalid');
+        input.classList.remove('is-invalid');
         break;
       case 'updated':
+        input.classList.remove('is-invalid');
+        feedback.textContent = '';
         renderContent(state, elements, i18n);
         break;
       case 'invalid':
