@@ -1,6 +1,5 @@
 import * as yup from 'yup';
 import axios from 'axios';
-import uniqueId from 'lodash/uniqueId.js';
 
 export const validate = (link, collection) => {
   const schemaStr = yup.string().required().url().trim();
@@ -19,30 +18,22 @@ export const parse = (data) => {
 
   const feedTitle = xmlDoc.querySelector('title').textContent;
   const feedDescr = xmlDoc.querySelector('description').textContent;
-  const id = uniqueId();
 
   const posts = [];
-  const postsVisits = [];
   const postsElems = xmlDoc.querySelectorAll('item');
   postsElems.forEach((post) => {
     const postTitle = post.querySelector('title').textContent;
     const postDescr = post.querySelector('description').textContent;
     const postLink = post.querySelector('link').textContent;
-    const postID = uniqueId();
-    const feedID = id;
     posts.push({
-      postID, postTitle, postDescr, postLink, feedID,
-    });
-    postsVisits.push({
-      postID, visited: false,
+      postTitle, postDescr, postLink,
     });
   });
 
   return {
     feed: {
-      id, feedTitle, feedDescr,
+      feedTitle, feedDescr,
     },
     posts,
-    postsVisits,
   };
 };

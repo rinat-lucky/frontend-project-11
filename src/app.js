@@ -1,8 +1,9 @@
 import onChange from 'on-change';
+import uniqueId from 'lodash/uniqueId.js';
 import render from './render.js';
 import { validate, getData, parse } from './utils.js';
 
-const TIMER = 7000;
+const TIMER = 10000;
 
 export default (i18n) => {
   const elements = {
@@ -23,31 +24,63 @@ export default (i18n) => {
     if (state.rssLinks.length < 1) return;
     const promises = state.rssLinks.forEach((url) => {
       getData(url)
-        .then((response) => {
-          const { posts } = parse(response.data.contents);
+        .then((rss) => {
+          const updatingFeed = state.feeds.find((feed) => feed.feedLink === url);
+          const { feed, posts } = parse(rss.data.contents);
+          feed.id = updatingFeed.id;
           const newPosts = posts.filter((post) => {
-            const collOfPostsLinks = state.posts.flat().map((postInState) => postInState.postLink);
+            const collOfPostsLinks = state.posts.map((postInState) => postInState.postLink);
             return !collOfPostsLinks.includes(post.postLink);
           });
-          watchedState.posts.push(newPosts);
+
+          if (newPosts.length === 0) return;
+          newPosts.forEach((post) => {
+            post.postID = uniqueId();
+            post.feedID = feed.id;
+            watchedState.postsVisits.push({
+              postID: post.postID, visited: false,
+            });
+          });
+
+          watchedState.posts = [...state.posts, ...newPosts];
           watchedState.formStatus = 'updated';
         })
         .catch((err) => err.message);
     });
-    const promise = Promise.all(promises);
-    promise.then(setTimeout(() => { updateRss(); }, TIMER))
+    Promise.all(promises)
+      .then(setTimeout(() => {
+        watchedState.formStatus = 'valid';
+        updateRss();
+      }, TIMER))
       .catch((err) => err.message);
+  };
+
+  const addNewRss = (parsedRss, link) => {
+    const { feed, posts } = parsedRss;
+    feed.id = uniqueId();
+    feed.feedLink = link;
+    watchedState.feeds.push(feed);
+    posts.forEach((post) => {
+      const { postTitle, postDescr, postLink } = post;
+      const postID = uniqueId();
+      const feedID = feed.id;
+      watchedState.posts.push({
+        postTitle, postDescr, postLink, postID, feedID,
+      });
+      watchedState.postsVisits.push({
+        postID, visited: false,
+      });
+    });
+    return state;
   };
 
   const handleEnteredLink = (link) => {
     validate(link, state.rssLinks)
       .then((validURL) => getData(validURL))
-      .then((data) => {
-        const { feed, posts, postsVisits } = parse(data.data.contents);
+      .then((rss) => {
+        const parsedRss = parse(rss.data.contents);
+        addNewRss(parsedRss, link);
         watchedState.rssLinks.push(link);
-        watchedState.feeds.push(feed);
-        watchedState.posts.push(posts);
-        watchedState.postsVisits.push(postsVisits);
         watchedState.error = '';
         watchedState.formStatus = 'success';
       })
