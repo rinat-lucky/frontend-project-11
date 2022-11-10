@@ -16,7 +16,7 @@ export default (i18n) => {
   };
 
   const state = {
-    formStatus: 'valid', contentStatus: 'valid', rssLinks: [], feeds: [], posts: [], postsVisits: [],
+    formStatus: 'valid', rssLinks: [], feeds: [], posts: [], postsVisits: [],
   };
   const watchedState = onChange(state, render(state, elements, i18n));
 
