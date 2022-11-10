@@ -41,7 +41,6 @@ export default (i18n) => {
               postID: post.postID, visited: false,
             });
           });
-
           watchedState.posts = [...state.posts, ...newPosts];
           watchedState.formStatus = 'updated';
         })
@@ -88,7 +87,6 @@ export default (i18n) => {
       .catch((err) => {
         watchedState.error = err.type ?? err.message.toLowerCase();
         watchedState.formStatus = 'invalid';
-        console.log('ОШИБКА', err);
       });
   };
 

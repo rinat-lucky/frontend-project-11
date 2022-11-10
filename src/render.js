@@ -23,7 +23,6 @@ const handleReadButton = (state, elements, i18n) => {
   const modalCloseBtn = modal.querySelector('.modal-close');
 
   const currentPostVisit = state.postsVisits
-    .flat()
     .find((postVisit) => postVisit.postID === state.currentVisitedPostID);
   currentPostVisit.visited = true;
   const post = state.posts.find((postInState) => postInState.postID === state.currentVisitedPostID);
@@ -32,17 +31,15 @@ const handleReadButton = (state, elements, i18n) => {
   modalReadBtn.setAttribute('href', `${post.postLink}`);
   modalReadBtn.textContent = i18n.t('modal.read');
   modalCloseBtn.textContent = i18n.t('modal.close');
-
-  // нужно обратиться к тексту ссылки и заменить шрифт
-  // const postInDOM = document.querySelector(`[data-id='${post.postID}']`);
-  // const link = postInDOM.previousElementSibling; // !!!
-
-  // console.log('LINK', link);
-  // link.classList.remove('fw-bold');
-  // link.classList.add('fw-normal');
+  modalCloseBtn.addEventListener('click', () => {
+    state.formStatus = 'valid';
+  });
+  const postElem = document.querySelector(`[data-id="${post.postID}"]`);
+  postElem.classList.remove('fw-bold');
+  postElem.classList.add('fw-normal');
 };
 
-const createPostItem = (post, state, elements, i18n) => {
+const createPostItem = (post, state, i18n) => {
   const postItem = document.createElement('li');
   postItem.setAttribute(
     'class',
@@ -131,7 +128,7 @@ const renderContent = (state, elements, i18n) => {
 
   state.feeds.forEach((feed) => feedsList.prepend(createFeedItem(feed)));
   state.posts.flat().forEach((post) => {
-    postsList.prepend(createPostItem(post, state, elements, i18n));
+    postsList.prepend(createPostItem(post, state, i18n));
   });
   return state;
 };
