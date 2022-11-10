@@ -97,4 +97,10 @@ export default (i18n) => {
     const formData = new FormData(e.target);
     handleEnteredLink(formData.get('url'));
   });
+
+  elements.postsContainer.addEventListener('click', (e) => {
+    e.preventDefault();
+    watchedState.currentVisitedPostID = e.target.dataset.id;
+    watchedState.formStatus = 'preview';
+  });
 };

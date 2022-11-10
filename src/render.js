@@ -15,25 +15,31 @@ const createFeedItem = (feed) => {
   return feedItem;
 };
 
-const handleReadButton = (event, post, state, elements, i18n) => {
-  const visitedPostID = event.target.dataset.id;
-  const targetPostVisit = state.postsVisits
-    .flat()
-    .find((postVisit) => postVisit.postID === visitedPostID);
-  targetPostVisit.visited = true;
+const handleReadButton = (state, elements, i18n) => {
   const { modal } = elements;
   const modalTitle = modal.querySelector('.modal-title');
   const modalDescr = modal.querySelector('.modal-descr');
   const modalReadBtn = modal.querySelector('.modal-link');
   const modalCloseBtn = modal.querySelector('.modal-close');
+
+  const currentPostVisit = state.postsVisits
+    .flat()
+    .find((postVisit) => postVisit.postID === state.currentVisitedPostID);
+  currentPostVisit.visited = true;
+  const post = state.posts.find((postInState) => postInState.postID === state.currentVisitedPostID);
   modalTitle.textContent = post.postTitle;
   modalDescr.textContent = post.postDescr;
   modalReadBtn.setAttribute('href', `${post.postLink}`);
   modalReadBtn.textContent = i18n.t('modal.read');
   modalCloseBtn.textContent = i18n.t('modal.close');
-  const link = event.target.previousElementSibling;
-  link.classList.remove('fw-bold');
-  link.classList.add('fw-normal');
+
+  // нужно обратиться к тексту ссылки и заменить шрифт
+  // const postInDOM = document.querySelector(`[data-id='${post.postID}']`);
+  // const link = postInDOM.previousElementSibling; // !!!
+
+  // console.log('LINK', link);
+  // link.classList.remove('fw-bold');
+  // link.classList.add('fw-normal');
 };
 
 const createPostItem = (post, state, elements, i18n) => {
@@ -67,10 +73,6 @@ const createPostItem = (post, state, elements, i18n) => {
   postButton.setAttribute('data-bs-toggle', 'modal');
   postButton.setAttribute('data-bs-target', '#modal');
   postButton.textContent = i18n.t('postButtonRead');
-  postButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    handleReadButton(e, post, state, elements, i18n);
-  });
   postItem.append(postLink);
   postItem.append(postButton);
   return postItem;
@@ -151,6 +153,10 @@ export default (state, elements, i18n) => (path, value) => {
         break;
       case 'success':
         renderFormSuccess(elements, i18n);
+        renderContent(state, elements, i18n);
+        break;
+      case 'preview':
+        handleReadButton(state, elements, i18n);
         renderContent(state, elements, i18n);
         break;
       default:
