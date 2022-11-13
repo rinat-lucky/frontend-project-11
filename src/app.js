@@ -44,7 +44,7 @@ export default (i18n) => {
           watchedState.formStatus = 'updated';
         })
         .catch((error) => {
-          throw new Error('Ошибка при обновлении фида: ', error);
+          throw new Error(`Ошибка при обновлении фида: ${url}`, error);
         });
       return state;
     });
