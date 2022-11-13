@@ -21,8 +21,7 @@ export default (i18n) => {
   const watchedState = onChange(state, render(state, elements, i18n));
 
   const updateRss = () => {
-    if (state.rssLinks.length < 1) return;
-    const promises = state.rssLinks.forEach((url) => {
+    const promises = state.rssLinks.map((url) => {
       getData(url)
         .then((rss) => {
           const updatingFeed = state.feeds.find((feed) => feed.feedLink === url);
@@ -44,14 +43,18 @@ export default (i18n) => {
           watchedState.posts = [...state.posts, ...newPosts];
           watchedState.formStatus = 'updated';
         })
-        .catch((err) => err.message);
+        .catch((error) => {
+          throw new Error(`Ошибка при обновлении фида: ${rss}`, error);
+        })
     });
     Promise.all(promises)
       .then(setTimeout(() => {
         watchedState.formStatus = 'valid';
         updateRss();
       }, TIMER))
-      .catch((err) => err.message);
+      .catch((error) => {
+        throw new Error(error);
+      })
   };
 
   const addNewRss = (parsedRss, link) => {
@@ -70,7 +73,6 @@ export default (i18n) => {
         postID, visited: false,
       });
     });
-    return state;
   };
 
   const handleEnteredLink = (link) => {
@@ -83,7 +85,6 @@ export default (i18n) => {
         watchedState.error = '';
         watchedState.formStatus = 'success';
       })
-      .then(setTimeout(() => { updateRss(); }, TIMER))
       .catch((err) => {
         watchedState.error = err.type ?? err.message.toLowerCase();
         watchedState.formStatus = 'invalid';
@@ -101,4 +102,6 @@ export default (i18n) => {
     watchedState.currentVisitedPostID = e.target.dataset.id;
     watchedState.formStatus = 'preview';
   });
+
+  updateRss();
 };
