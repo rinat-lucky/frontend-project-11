@@ -44,8 +44,8 @@ export default (i18n) => {
           watchedState.formStatus = 'updated';
         })
         .catch((error) => {
-          throw new Error(`Ошибка при обновлении фида: ${rss}`, error);
-        })
+          throw new Error('Ошибка при обновлении фида: ', error);
+        });
     });
     Promise.all(promises)
       .then(setTimeout(() => {
@@ -54,7 +54,7 @@ export default (i18n) => {
       }, TIMER))
       .catch((error) => {
         throw new Error(error);
-      })
+      });
   };
 
   const addNewRss = (parsedRss, link) => {
