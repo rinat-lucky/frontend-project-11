@@ -46,6 +46,7 @@ export default (i18n) => {
         .catch((error) => {
           throw new Error('Ошибка при обновлении фида: ', error);
         });
+      return state;
     });
     Promise.all(promises)
       .then(setTimeout(() => {

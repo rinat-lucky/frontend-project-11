@@ -16,4 +16,3 @@ rules:
     - js: always
   no-underscore-dangle: [2, { "allow": ["__filename", "__dirname"] }]
   no-param-reassign: 0
-  array-callback-return: 0
