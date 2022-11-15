@@ -16,7 +16,13 @@ export default (i18n) => {
   };
 
   const state = {
-    formStatus: 'valid', rssLinks: [], feeds: [], posts: [], postsVisits: [],
+    formState: 'valid',
+    contentState: '',
+    modalState: '',
+    rssLinks: [],
+    feeds: [],
+    posts: [],
+    postsVisits: [],
   };
   const watchedState = onChange(state, render(state, elements, i18n));
 
@@ -41,7 +47,7 @@ export default (i18n) => {
             });
           });
           watchedState.posts = [...state.posts, ...newPosts];
-          watchedState.formStatus = 'updated';
+          watchedState.contentState = 'updated';
         })
         .catch((error) => {
           throw new Error(`Ошибка при обновлении фида: ${url}`, error);
@@ -50,7 +56,7 @@ export default (i18n) => {
     });
     Promise.all(promises)
       .then(setTimeout(() => {
-        watchedState.formStatus = 'valid';
+        watchedState.contentState = 'valid';
         updateRss();
       }, TIMER))
       .catch((error) => {
@@ -84,11 +90,12 @@ export default (i18n) => {
         addNewRss(parsedRss, link);
         watchedState.rssLinks.push(link);
         watchedState.error = '';
-        watchedState.formStatus = 'success';
+        watchedState.formState = 'added';
+        watchedState.contentState = 'updated';
       })
       .catch((err) => {
         watchedState.error = err.type ?? err.message.toLowerCase();
-        watchedState.formStatus = 'invalid';
+        watchedState.formState = 'invalid';
       });
   };
 
@@ -100,8 +107,12 @@ export default (i18n) => {
 
   elements.postsContainer.addEventListener('click', (e) => {
     e.preventDefault();
+    const currentPost = state.postsVisits
+      .find((postVisit) => postVisit.postID === e.target.dataset.id);
+    currentPost.visited = true;
     watchedState.currentVisitedPostID = e.target.dataset.id;
-    watchedState.formStatus = 'preview';
+    watchedState.modalState = 'opened';
+    watchedState.contentState = 'updated';
   });
 
   updateRss();

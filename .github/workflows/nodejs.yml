@@ -1,4 +1,4 @@
-name: Linter AirBNB
+name: Linter AirBnB
 
 on:
   - push

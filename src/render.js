@@ -11,7 +11,14 @@ const createInnerContainer = (container, i18n) => {
 const createFeedItem = (feed) => {
   const feedItem = document.createElement('li');
   feedItem.setAttribute('class', 'list-group-item border-0 border-end-0');
-  feedItem.innerHTML = `<h3 class="h6 m-0">${feed.feedTitle}</h3><p class="m-0 small text-black-50">${feed.feedDescr}</p>`;
+  const feedHeader = document.createElement('h3');
+  feedHeader.textContent = feed.feedTitle;
+  feedHeader.setAttribute('class', 'h6 m-0');
+  feedItem.append(feedHeader);
+  const feedBody = document.createElement('p');
+  feedBody.textContent = feed.feedDescr;
+  feedBody.setAttribute('class', 'm-0 small text-black-50');
+  feedItem.append(feedBody);
   return feedItem;
 };
 
@@ -22,19 +29,16 @@ const handleReadButton = (state, elements, i18n) => {
   const modalReadBtn = modal.querySelector('.modal-link');
   const modalCloseBtn = modal.querySelector('.modal-close');
 
-  const currentPostVisit = state.postsVisits
-    .find((postVisit) => postVisit.postID === state.currentVisitedPostID);
-  currentPostVisit.visited = true;
-  const post = state.posts.find((postInState) => postInState.postID === state.currentVisitedPostID);
-  modalTitle.textContent = post.postTitle;
-  modalDescr.textContent = post.postDescr;
-  modalReadBtn.setAttribute('href', `${post.postLink}`);
+  const currentPost = state.posts.find((post) => post.postID === state.currentVisitedPostID);
+  modalTitle.textContent = currentPost.postTitle;
+  modalDescr.textContent = currentPost.postDescr;
+  modalReadBtn.setAttribute('href', `${currentPost.postLink}`);
   modalReadBtn.textContent = i18n.t('modal.read');
   modalCloseBtn.textContent = i18n.t('modal.close');
   modalCloseBtn.addEventListener('click', () => {
-    state.formStatus = 'valid';
+    state.modalState = '';
   });
-  const postElem = document.querySelector(`[data-id="${post.postID}"]`);
+  const postElem = document.querySelector(`[data-id="${currentPost.postID}"]`);
   postElem.classList.remove('fw-bold');
   postElem.classList.add('fw-normal');
 };
@@ -135,27 +139,33 @@ const renderContent = (state, elements, i18n) => {
 
 export default (state, elements, i18n) => (path, value) => {
   const { input, feedback } = elements;
-  if (path === 'formStatus') {
+  if (path === 'formState') {
     switch (value) {
       case 'valid':
         input.classList.remove('is-invalid');
-        break;
-      case 'updated':
-        input.classList.remove('is-invalid');
         feedback.textContent = '';
-        renderContent(state, elements, i18n);
         break;
       case 'invalid':
-        renderFormError(state, elements, i18n);
-        break;
-      case 'success':
-        renderFormSuccess(elements, i18n);
-        renderContent(state, elements, i18n);
-        break;
-      case 'preview':
-        handleReadButton(state, elements, i18n);
-        renderContent(state, elements, i18n);
-        break;
+        return renderFormError(state, elements, i18n);
+      case 'added':
+        return renderFormSuccess(elements, i18n);
+      default:
+        throw new Error(`Unknown state: ${value}`);
+    }
+  }
+  if (path === 'contentState') {
+    switch (value) {
+      case 'valid':
+      case 'updated':
+        return renderContent(state, elements, i18n);
+      default:
+        throw new Error(`Unknown state: ${value}`);
+    }
+  }
+  if (path === 'modalState') {
+    switch (value) {
+      case 'opened':
+        return handleReadButton(state, elements, i18n);
       default:
         throw new Error(`Unknown state: ${value}`);
     }
