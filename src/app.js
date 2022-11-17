@@ -9,6 +9,7 @@ export default (i18n) => {
   const elements = {
     form: document.querySelector('form'),
     input: document.querySelector('#url-input'),
+    submit: document.querySelector('[type="submit"]'),
     feedback: document.querySelector('.feedback'),
     postsContainer: document.querySelector('.posts'),
     feedsContainer: document.querySelector('.feeds'),
@@ -16,13 +17,11 @@ export default (i18n) => {
   };
 
   const state = {
-    formState: 'valid',
-    contentState: '',
-    modalState: '',
+    formState: 'filling',
     rssLinks: [],
     feeds: [],
     posts: [],
-    postsVisits: [],
+    visitedPostsID: [],
   };
   const watchedState = onChange(state, render(state, elements, i18n));
 
@@ -42,12 +41,8 @@ export default (i18n) => {
           newPosts.forEach((post) => {
             post.postID = uniqueId();
             post.feedID = feed.id;
-            watchedState.postsVisits.push({
-              postID: post.postID, visited: false,
-            });
           });
           watchedState.posts = [...state.posts, ...newPosts];
-          watchedState.contentState = 'updated';
         })
         .catch((error) => {
           throw new Error(`Ошибка при обновлении фида: ${url}`, error);
@@ -56,7 +51,6 @@ export default (i18n) => {
     });
     Promise.all(promises)
       .then(setTimeout(() => {
-        watchedState.contentState = 'valid';
         updateRss();
       }, TIMER))
       .catch((error) => {
@@ -76,26 +70,25 @@ export default (i18n) => {
       watchedState.posts.push({
         postTitle, postDescr, postLink, postID, feedID,
       });
-      watchedState.postsVisits.push({
-        postID, visited: false,
-      });
     });
   };
 
   const handleEnteredLink = (link) => {
     validate(link, state.rssLinks)
-      .then((validURL) => getData(validURL))
+      .then((validURL) => {
+        watchedState.formState = 'sending';
+        return getData(validURL);
+      })
       .then((rss) => {
         const parsedRss = parse(rss.data.contents);
         addNewRss(parsedRss, link);
-        watchedState.rssLinks.push(link);
-        watchedState.error = '';
-        watchedState.formState = 'added';
-        watchedState.contentState = 'updated';
+        state.rssLinks.push(link);
+        state.error = '';
+        watchedState.formState = 'success';
       })
       .catch((err) => {
-        watchedState.error = err.type ?? err.message.toLowerCase();
-        watchedState.formState = 'invalid';
+        state.error = err.type ?? err.message.toLowerCase();
+        watchedState.formState = 'error';
       });
   };
 
@@ -107,12 +100,8 @@ export default (i18n) => {
 
   elements.postsContainer.addEventListener('click', (e) => {
     e.preventDefault();
-    const currentPost = state.postsVisits
-      .find((postVisit) => postVisit.postID === e.target.dataset.id);
-    currentPost.visited = true;
-    watchedState.currentVisitedPostID = e.target.dataset.id;
-    watchedState.modalState = 'opened';
-    watchedState.contentState = 'updated';
+    state.currentVisitedPostID = e.target.dataset.id;
+    watchedState.visitedPostsID.push(e.target.dataset.id);
   });
 
   updateRss();

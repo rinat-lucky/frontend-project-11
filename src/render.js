@@ -35,9 +35,6 @@ const handleReadButton = (state, elements, i18n) => {
   modalReadBtn.setAttribute('href', `${currentPost.postLink}`);
   modalReadBtn.textContent = i18n.t('modal.read');
   modalCloseBtn.textContent = i18n.t('modal.close');
-  modalCloseBtn.addEventListener('click', () => {
-    state.modalState = '';
-  });
   const postElem = document.querySelector(`[data-id="${currentPost.postID}"]`);
   postElem.classList.remove('fw-bold');
   postElem.classList.add('fw-normal');
@@ -52,11 +49,8 @@ const createPostItem = (post, state, i18n) => {
 
   const postLink = document.createElement('a');
   postLink.setAttribute('href', `${post.postLink}`);
-  const targetPostVisit = state.postsVisits
-    .flat()
-    .find((postVisit) => postVisit.postID === post.postID);
 
-  if (targetPostVisit.visited) {
+  if (state.visitedPostsID.includes(post.postID)) {
     postLink.setAttribute('class', 'fw-normal');
   } else {
     postLink.setAttribute('class', 'fw-bold');
@@ -80,7 +74,8 @@ const createPostItem = (post, state, i18n) => {
 };
 
 const renderFormError = (state, elements, i18n) => {
-  const { input, feedback } = elements;
+  const { input, submit, feedback } = elements;
+  submit.disabled = false;
   input.classList.add('is-invalid');
   feedback.classList.remove('text-success');
   feedback.classList.add('text-danger');
@@ -106,7 +101,10 @@ const renderFormError = (state, elements, i18n) => {
 };
 
 const renderFormSuccess = (elements, i18n) => {
-  const { form, input, feedback } = elements;
+  const {
+    form, input, submit, feedback,
+  } = elements;
+  submit.disabled = false;
   input.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.classList.add('text-success');
@@ -137,38 +135,39 @@ const renderContent = (state, elements, i18n) => {
   return state;
 };
 
-export default (state, elements, i18n) => (path, value) => {
-  const { input, feedback } = elements;
-  if (path === 'formState') {
-    switch (value) {
-      case 'valid':
-        input.classList.remove('is-invalid');
-        feedback.textContent = '';
-        break;
-      case 'invalid':
-        return renderFormError(state, elements, i18n);
-      case 'added':
-        return renderFormSuccess(elements, i18n);
-      default:
-        throw new Error(`Unknown state: ${value}`);
-    }
-  }
-  if (path === 'contentState') {
-    switch (value) {
-      case 'valid':
-      case 'updated':
-        return renderContent(state, elements, i18n);
-      default:
-        throw new Error(`Unknown state: ${value}`);
-    }
-  }
-  if (path === 'modalState') {
-    switch (value) {
-      case 'opened':
-        return handleReadButton(state, elements, i18n);
-      default:
-        throw new Error(`Unknown state: ${value}`);
-    }
+const handleFormState = (state, elements, i18n) => {
+  const { input, submit, feedback } = elements;
+  switch (state.formState) {
+    case 'filling':
+      submit.disabled = false;
+      input.classList.remove('is-invalid');
+      feedback.textContent = '';
+      break;
+    case 'sending':
+      submit.disabled = true;
+      feedback.textContent = i18n.t('feedback.loading');
+      break;
+    case 'success':
+      return renderFormSuccess(elements, i18n);
+    case 'error':
+      return renderFormError(state, elements, i18n);
+    default:
+      throw new Error(`Unknown state: ${state.formState}`);
   }
   return state;
+};
+
+export default (state, elements, i18n) => (path) => {
+  switch (path) {
+    case 'formState':
+      return handleFormState(state, elements, i18n);
+    case 'feeds':
+    case 'posts':
+      return renderContent(state, elements, i18n);
+    case 'visitedPostsID':
+      handleReadButton(state, elements, i18n);
+      return renderContent(state, elements, i18n);
+    default:
+      throw new Error(`Unknown path: ${path}`);
+  }
 };

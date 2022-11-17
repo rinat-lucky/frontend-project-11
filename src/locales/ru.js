@@ -8,6 +8,7 @@ export default {
       invalidUnknown: 'Возникла неизвестная ошибка. Попробуйте еще раз',
       invalidRSS: 'Ресурс не содержит валидный RSS',
       invalidNetwork: 'Ошибка сети',
+      loading: 'Идет загрузка...',
     },
     modal: {
       read: 'Читать полностью',
